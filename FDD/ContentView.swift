@@ -34,28 +34,37 @@ struct ContentView: View {
                     }
                 }
                 .navigationBarTitle("Filmdatabas")
+                .toolbar{
+                    ToolbarItem(placement: .bottomBar) {
+                        Button("Lägg till film") {
+                            newYear = ""
+                            newTitle = ""
+                            showSheet = true
+                        }
+                    }
+                }
             }
-            Spacer()
-            Button("Lägg till film") {
-                newYear = ""
-                newTitle = ""
-                showSheet = true
-            }
-            .sheet(isPresented: $showSheet) {
+            .popover(isPresented: $showSheet) {
                 VStack(spacing: 20) {
                     Text("Lägg till film")
                     TextField("Titel ...", text: $newTitle)
                     TextField("Publicerad ...", text: $newYear)
-                    Button("Spara") {
-
-                        if !newTitle.isEmpty, !newYear.isEmpty,
-                            let year = Int(newYear)
-                        {
-                            movies.append(
-                                Movie(title: newTitle, releaseYear: year)
-                            )
+                    HStack(spacing: 20){
+                        Button("Avbryt"){
                             showSheet = false
-                        }
+                            
+                        }.foregroundColor(.red)
+                        Button("Spara") {
+                            
+                            if !newTitle.isEmpty, !newYear.isEmpty,
+                               let year = Int(newYear)
+                            {
+                                movies.append(
+                                    Movie(title: newTitle, releaseYear: year)
+                                )
+                                showSheet = false
+                            }
+                        }.buttonStyle(.borderedProminent)
                     }
                 }.padding(20)
             }

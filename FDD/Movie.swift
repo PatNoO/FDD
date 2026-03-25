@@ -11,5 +11,6 @@ struct Movie : Identifiable, Hashable {
     let id = UUID()
     let title: String
     let releaseYear: Int
+    var description: String = ""
     
 }
