@@ -22,5 +22,5 @@ struct MovieDetailView: View {
 }
 
 #Preview {
-    MovieDetailView(movie: Movie(title: "The Matrix", releaseYear: "1999"))
+    MovieDetailView(movie: Movie(title: "The Matrix", releaseYear: 1999))
 }
