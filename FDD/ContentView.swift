@@ -23,9 +23,9 @@ struct ContentView: View {
     var body: some View {
         VStack {
             NavigationStack {
-                List(movies) { movie in
+                List($movies) { $movie in
                     NavigationLink {
-                        MovieDetailView(movie: movie)
+                        MovieDetailView(movie: $movie)
                     } label: {
                         HStack {
                             Image(systemName: "movieclapper")
