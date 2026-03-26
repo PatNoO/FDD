@@ -8,24 +8,39 @@
 import SwiftUI
 
 struct MovieDetailView: View {
-    let movie: Movie
-    var description : String = ""
+    @Binding var movie: Movie
+    var newDescription: String = ""
     var body: some View {
-        VStack {
-            Text(movie.title)
-                .font(.largeTitle)
-                .foregroundColor(.primary)
+        VStack (spacing: 12) {
+
             Text("Released in \(String(movie.releaseYear))")
                 .font(.title)
                 .foregroundColor(.secondary)
-        }
-        Text(description)
-        Button("Edit"){
+            
+            Text(movie.description)
+                .font(.body)
+                .foregroundColor(.secondary)
+            
+                
+            
+            
             
         }
+        .toolbar {
+            ToolbarItem (placement: .bottomBar) {
+                Button("Edit") {
+
+                }
+            }
+        }
+        .navigationTitle(movie.title)
+        
     }
 }
 
 #Preview {
-    MovieDetailView(movie: Movie(title: "The Matrix", releaseYear: 1999))
+    MovieDetailView(
+        movie: .constant(Movie(title: "The Matrix", releaseYear: 1999, description: "Här är en beskrivning"))
+    )
 }
+
