@@ -39,14 +39,25 @@ struct ContentView: View {
     @State private var showSheet = false
     @State private var newTitle = ""
     @State private var newYear = ""
+    @State private var searchTerm = ""
+    var filteredMovies: [Movie] {
+        if searchTerm.isEmpty {
+            return movies
+        }
+        return movies.filter {
+            $0.title.localizedCaseInsensitiveContains(searchTerm)
+        }
+    }
 
     var body: some View {
         VStack {
             NavigationStack {
                 List {
-                    ForEach($movies) { $movie in
+                    ForEach(filteredMovies) { movie in
                         NavigationLink {
-                            MovieDetailView(movie: $movie)
+                            if let index = movies.firstIndex(where: {$0.id == movie.id}){
+                                MovieDetailView(movie: $movies[index])
+                            }
                         } label: {
                             HStack {
                                 Image(systemName: "movieclapper")
@@ -56,7 +67,8 @@ struct ContentView: View {
                     }
                     .onDelete { movies.remove(atOffsets: $0) }
                 }
-                .navigationBarTitle("Filmdatabas")
+                .navigationTitle("Filmdatabas")
+                .searchable(text: $searchTerm, prompt: "Sök film")
                 .toolbar {
                     ToolbarItem(placement: .bottomBar) {
                         Button("Lägg till film") {
