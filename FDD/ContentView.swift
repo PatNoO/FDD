@@ -41,69 +41,71 @@ struct ContentView: View {
     @State private var newYear = ""
     @State private var searchTerm = ""
     var filteredMovies: [Movie] {
-        guard !searchTerm.isEmpty else { return movies }
+        if searchTerm.isEmpty {
+            return movies
+        }
         return movies.filter {
             $0.title.localizedCaseInsensitiveContains(searchTerm)
         }
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(filteredMovies) { movie in
-                    NavigationLink {
-                        if let index = movies.firstIndex(where: {
-                            $0.id == movie.id
-                        }) {
-                            MovieDetailView(movie: $movies[index])
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "movieclapper")
-                            Text(movie.title)
+        VStack {
+            NavigationStack {
+                List {
+                    ForEach(filteredMovies) { movie in
+                        NavigationLink {
+                            if let index = movies.firstIndex(where: {$0.id == movie.id}){
+                                MovieDetailView(movie: $movies[index])
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "movieclapper")
+                                Text(movie.title)
+                            }
                         }
                     }
+                    .onDelete { movies.remove(atOffsets: $0) }
                 }
-                .onDelete { movies.remove(atOffsets: $0) }
-            }
-            .navigationTitle("Filmdatabas")
-            .searchable(text: $searchTerm, prompt: "Sök film")
-            .toolbar {
-                ToolbarItem(placement: .bottomBar) {
-                    Button("Lägg till film") {
-                        newYear = ""
-                        newTitle = ""
-                        showSheet = true
+                .navigationTitle("Filmdatabas")
+                .searchable(text: $searchTerm, prompt: "Sök film")
+                .toolbar {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button("Lägg till film") {
+                            newYear = ""
+                            newTitle = ""
+                            showSheet = true
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        EditButton()
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
-                }
             }
-        }
-        .popover(isPresented: $showSheet) {
-            VStack(spacing: 20) {
-                Text("Lägg till film")
-                TextField("Titel ...", text: $newTitle)
-                TextField("Publicerad ...", text: $newYear)
-                HStack(spacing: 20) {
-                    Button("Avbryt") {
-                        showSheet = false
-
-                    }.foregroundColor(.red)
-                    Button("Spara") {
-
-                        if !newTitle.isEmpty, !newYear.isEmpty,
-                            let year = Int(newYear)
-                        {
-                            movies.append(
-                                Movie(title: newTitle, releaseYear: year)
-                            )
+            .popover(isPresented: $showSheet) {
+                VStack(spacing: 20) {
+                    Text("Lägg till film")
+                    TextField("Titel ...", text: $newTitle)
+                    TextField("Publicerad ...", text: $newYear)
+                    HStack(spacing: 20) {
+                        Button("Avbryt") {
                             showSheet = false
-                        }
-                    }.buttonStyle(.borderedProminent)
-                }
-            }.padding(20)
+
+                        }.foregroundColor(.red)
+                        Button("Spara") {
+
+                            if !newTitle.isEmpty, !newYear.isEmpty,
+                                let year = Int(newYear)
+                            {
+                                movies.append(
+                                    Movie(title: newTitle, releaseYear: year)
+                                )
+                                showSheet = false
+                            }
+                        }.buttonStyle(.borderedProminent)
+                    }
+                }.padding(20)
+            }
         }
 
     }
@@ -111,50 +113,36 @@ struct ContentView: View {
 
 struct MovieDetailView: View {
     @Binding var movie: Movie
-    @State private var isEditing = false
-
+    //    private var newDescription: String = ""
     var body: some View {
-        NavigationStack {
+        VStack(alignment: .leading, spacing: 12) {
 
-            ScrollView {
+            Text("Released in \(String(movie.releaseYear))")
+                .font(.title)
+                .foregroundColor(.secondary)
 
-                VStack(alignment: .leading, spacing: 12) {
+            TextField(
+                "Lägg till handling ...",
+                text: $movie.description,
+                axis: .vertical
+            )
+            .lineLimit(5...10)
 
-                 
+            .font(.body)
+            .foregroundColor(.secondary)
 
-                    if isEditing {
-                        TextEditor(
-                            //                    "Lägg till handling ...",
-                            text: $movie.description,
-                            //                    axis: .vertical
-                        )
-                        .font(.body)
-                        .frame(minHeight: 200)
-                    } else {
-                        Text(
-                            movie.description.isEmpty
-                                ? "Lägg till omdömme" : movie.description
-                        )
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                    }
-
-                }
-                .scrollDisabled(false)
-                .padding(20)
-
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(isEditing ? "Klar" : "Edit") {
-                        isEditing.toggle()
-                    }
-                }
-            }
-            
+            Spacer()
         }
-        .navigationTitle("\(movie.title) ")
-        .navigationSubtitle("(\(String(movie.releaseYear)))")
+        .padding(20)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Edit") {
+
+                }
+            }
+        }
+        .navigationTitle(movie.title)
+
     }
 }
 
