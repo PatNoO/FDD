@@ -7,12 +7,26 @@
 
 import SwiftUI
 
+struct Movie : Identifiable, Hashable {
+    let id = UUID()
+    var title: String
+    let releaseYear: Int
+    var description: String = ""
+    
+}
+
 struct ContentView: View {
     
     var body: some View {
         TabView {
             MoviesView()
+                .tabItem{
+                    Label("Film", systemImage: "film.stack")
+                }
             AboutView()
+                .tabItem {
+                    Label("Om", systemImage: "info.circle")
+                }
         }
     }
 }
@@ -94,9 +108,19 @@ struct MoviesView: View {
         }
         .popover(isPresented: $showSheet) {
             VStack(spacing: 20) {
+                Image(systemName: "popcorn")
+                    .resizable()
+                    .frame(width: 100.0, height: 100.0)
+                    .frame(maxWidth: 300, maxHeight: 300, alignment: .center)
                 Text("Lägg till film")
                 TextField("Titel ...", text: $newTitle)
+                    .font(.body)
+                    .padding(.horizontal, 4)
+                    .frame(height: 50)
                 TextField("Publicerad ...", text: $newYear)
+                    .font(.body)
+                    .padding(.horizontal, 4)
+                    .frame(height: 50)
                 HStack(spacing: 20) {
                     Button("Avbryt") {
                         showSheet = false
