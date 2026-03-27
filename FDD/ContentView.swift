@@ -8,6 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    var body: some View {
+        TabView {
+            MoviesView()
+            AboutView()
+        }
+    }
+}
+
+struct MoviesView: View {
+    
     @State private var movies = [
         Movie(
             title: "The Matrix",
@@ -40,13 +51,14 @@ struct ContentView: View {
     @State private var newTitle = ""
     @State private var newYear = ""
     @State private var searchTerm = ""
+    
     var filteredMovies: [Movie] {
         guard !searchTerm.isEmpty else { return movies }
         return movies.filter {
             $0.title.localizedCaseInsensitiveContains(searchTerm)
         }
     }
-
+    
     var body: some View {
         NavigationStack {
             List {
@@ -69,15 +81,14 @@ struct ContentView: View {
             .navigationTitle("Filmdatabas")
             .searchable(text: $searchTerm, prompt: "Sök film")
             .toolbar {
-                ToolbarItem(placement: .bottomBar) {
-                    Button("Lägg till film") {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         newYear = ""
                         newTitle = ""
                         showSheet = true
+                    } label: {
+                        Image(systemName: "plus")
                     }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
                 }
             }
         }
@@ -105,7 +116,20 @@ struct ContentView: View {
                 }
             }.padding(20)
         }
+    }
+}
 
+struct AboutView: View {
+    var body: some View {
+        VStack {
+            Text("Om appen")
+                .font(.largeTitle)
+                .padding()
+            Text("Denna app är en enkel lista över filmer. Du kan lägga till nya filmer, redigera beskrivningar och ta bort filmer.")
+                .font(.body)
+                .padding()
+        }
+        .previewDisplayName("Om appen")
     }
 }
 
@@ -114,47 +138,35 @@ struct MovieDetailView: View {
     @State private var isEditing = false
 
     var body: some View {
-        NavigationStack {
-
-            ScrollView {
-
-                VStack(alignment: .leading, spacing: 12) {
-
-                 
-
-                    if isEditing {
-                        TextEditor(
-                            //                    "Lägg till handling ...",
-                            text: $movie.description,
-                            //                    axis: .vertical
-                        )
-                        .font(.body)
-                        .frame(minHeight: 200)
-                    } else {
-                        Text(
-                            movie.description.isEmpty
-                                ? "Lägg till omdömme" : movie.description
-                        )
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                    }
-
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("(\(String(movie.releaseYear)))")
+                if isEditing {
+                    TextEditor(text: $movie.description)
+                    .font(.body)
+                    .frame(maxWidth: .infinity, minHeight: 200)
+                } else {
+                    Text(
+                        movie.description.isEmpty
+                            ? "Lägg till omdömme" : movie.description
+                    )
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .font(.body)
+                    .foregroundColor(.secondary)
                 }
-                .scrollDisabled(false)
-                .padding(20)
 
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(isEditing ? "Klar" : "Edit") {
-                        isEditing.toggle()
-                    }
+            .scrollDisabled(false)
+            .padding(20)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(isEditing ? "Klar" : "Edit") {
+                    isEditing.toggle()
                 }
             }
-            
         }
         .navigationTitle("\(movie.title) ")
-        .navigationSubtitle("(\(String(movie.releaseYear)))")
     }
 }
 
