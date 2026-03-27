@@ -7,20 +7,20 @@
 
 import SwiftUI
 
-struct Movie : Identifiable, Hashable {
+struct Movie: Identifiable, Hashable {
     let id = UUID()
     var title: String
     let releaseYear: Int
     var description: String = ""
-    
+
 }
 
 struct ContentView: View {
-    
+
     var body: some View {
         TabView {
             MoviesView()
-                .tabItem{
+                .tabItem {
                     Label("Film", systemImage: "film.stack")
                 }
             AboutView()
@@ -32,7 +32,7 @@ struct ContentView: View {
 }
 
 struct MoviesView: View {
-    
+
     @State private var movies = [
         Movie(
             title: "The Matrix",
@@ -65,14 +65,14 @@ struct MoviesView: View {
     @State private var newTitle = ""
     @State private var newYear = ""
     @State private var searchTerm = ""
-    
+
     var filteredMovies: [Movie] {
         guard !searchTerm.isEmpty else { return movies }
         return movies.filter {
             $0.title.localizedCaseInsensitiveContains(searchTerm)
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -91,6 +91,10 @@ struct MoviesView: View {
                     }
                 }
                 .onDelete { movies.remove(atOffsets: $0) }
+                .onMove { source, destination in
+                    movies.move(fromOffsets: source, toOffset: destination)
+                }
+
             }
             .navigationTitle("Filmdatabas")
             .searchable(text: $searchTerm, prompt: "Sök film")
@@ -104,54 +108,74 @@ struct MoviesView: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    EditButton()
+                }
             }
         }
         .popover(isPresented: $showSheet) {
-            VStack(spacing: 20) {
-                Image(systemName: "popcorn")
-                    .resizable()
-                    .frame(width: 100.0, height: 100.0)
-                    .frame(maxWidth: 300, maxHeight: 300, alignment: .center)
-                Text("Lägg till film")
-                TextField("Titel ...", text: $newTitle)
-                    .font(.body)
-                    .padding(.horizontal, 4)
-                    .frame(height: 50)
-                TextField("Publicerad ...", text: $newYear)
-                    .font(.body)
-                    .padding(.horizontal, 4)
-                    .frame(height: 50)
-                HStack(spacing: 20) {
-                    Button("Avbryt") {
-                        showSheet = false
-
-                    }.foregroundColor(.red)
-                    Button("Spara") {
-
-                        if !newTitle.isEmpty, !newYear.isEmpty,
-                            let year = Int(newYear)
-                        {
-                            movies.append(
-                                Movie(title: newTitle, releaseYear: year)
-                            )
-                            showSheet = false
-                        }
-                    }.buttonStyle(.borderedProminent)
-                }
-            }.padding(20)
+            showAddMovie()
         }
     }
+
+    func showAddMovie() -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "popcorn")
+                .resizable()
+                .frame(width: 100.0, height: 100.0)
+                .frame(maxWidth: 300, maxHeight: 300, alignment: .center)
+            Text("Lägg till film")
+            TextField("Titel ...", text: $newTitle)
+                .font(.body)
+                .padding(.horizontal, 4)
+                .frame(height: 50)
+            TextField("Publicerad ...", text: $newYear)
+                .font(.body)
+                .padding(.horizontal, 4)
+                .frame(height: 50)
+            HStack(spacing: 20) {
+                Button("Avbryt") {
+                    showSheet = false
+
+                }.foregroundColor(.red)
+                Button("Spara") {
+
+                    if !newTitle.isEmpty, !newYear.isEmpty,
+                        let year = Int(newYear)
+                    {
+                        movies.append(
+                            Movie(title: newTitle, releaseYear: year)
+                        )
+                        showSheet = false
+                    }
+                }.buttonStyle(.borderedProminent)
+            }
+        }.padding(20)
+    }
+
 }
 
 struct AboutView: View {
     var body: some View {
         VStack {
+            
+            Image(systemName: "questionmark.video")
+                .resizable()
+                .scaledToFit()
+                .padding(30)
+                
+                
+                
+                
+            
             Text("Om appen")
                 .font(.largeTitle)
                 .padding()
-            Text("Denna app är en enkel lista över filmer. Du kan lägga till nya filmer, redigera beskrivningar och ta bort filmer.")
-                .font(.body)
-                .padding()
+            Text(
+                "Denna app är en enkel lista över filmer. Du kan lägga till nya filmer, redigera beskrivningar och ta bort filmer."
+            )
+            .font(.body)
+            .padding()
         }
         .previewDisplayName("Om appen")
     }
@@ -167,8 +191,8 @@ struct MovieDetailView: View {
                 Text("(\(String(movie.releaseYear)))")
                 if isEditing {
                     TextEditor(text: $movie.description)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, minHeight: 200)
+                        .font(.body)
+                        .frame(maxWidth: .infinity, minHeight: 200)
                 } else {
                     Text(
                         movie.description.isEmpty
